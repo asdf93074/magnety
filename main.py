@@ -1,26 +1,28 @@
 import os
 import argparse
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from rich.console import Console
 from rich.markdown import Markdown
 
+load_dotenv()
+
 base_url = "https://api.cerebras.ai/v1"
-api_key = os.environ.get("CEREB_API_KEY", None) 
-model_name = os.environ.get("CEREB_MODEL_NAME", "qwen-3-32b")
+api_key = os.getenv("CEREB_API_KEY", None) 
+model_name = os.getenv("CEREB_MODEL_NAME", "qwen-3-32b")
 
 stop_program = False
 
 console = Console()
-
 parser = argparse.ArgumentParser()
+client = OpenAI(
+        base_url=base_url,
+        api_key=api_key,
+        )
+
 parser.add_argument("message", type=str, default=None)
 args = parser.parse_args()
-
-client = OpenAI(
-    base_url=base_url,
-    api_key=api_key,
-)
 
 def build_msg(role, msg):
     if role == None:
@@ -33,7 +35,7 @@ def build_msg(role, msg):
 
 usr_msg = args.message
 messages = []
-messages.append(build_msg("assistant", "You are a coding agent."))
+messages.append(build_msg("assistant", "You are a coding agent. Give short, to the point answers in minimal number of lines."))
 messages.append(build_msg("user", usr_msg))
 
 try:
