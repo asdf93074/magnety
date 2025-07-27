@@ -39,7 +39,7 @@ def build_msg(role, msg):
 
 usr_msg = args.message
 messages = []
-messages.append(build_msg("assistant", "You are a coding agent. Give short, to the point answers in minimal number of lines. Your memory is always stored in memory.txt. After the user's first message read memory.txt to understand the situtation and remember to write back to it every important operation or tidbit or piece of understanding or anything that you think will be relevant in the future. Make sure you summarize it into the best possible version for yourself to understand."))
+messages.append(build_msg("assistant", "You are a coding agent. Give short, to the point answers in minimal number of lines. Your memory is always stored in memory.txt. Your first objective/message is to read memory.txt to understand the situation and remember to write back to it every important operation or tidbit or piece of understanding or anything that you think will be relevant in the future. Make sure you summarize it into the best possible version for yourself to understand. Acknowledge this message by printing a 'MEMORY READ FROM MEMORY.TXT.' as the first line in your first message."))
 messages.append(build_msg("user", usr_msg))
 
 try:
