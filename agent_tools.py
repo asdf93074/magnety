@@ -1,7 +1,7 @@
 import os
 
 def list_files():
-    return os.listdir()
+    return sorted(os.listdir())
 
 def read_file(filename: str):
     with open(filename, 'r') as f:
@@ -10,17 +10,20 @@ def read_file(filename: str):
 def read_file_at_line(filename: str, line_number: int):
     with open(filename, 'r') as f:
         lines = f.readlines()
-        return lines[line_number] 
+        return lines[line_number-1] 
+
+def write_file(filename: str, lines: list[str]):
+    with open(filename, 'w+') as f:
+        f.write("\n".join(lines))
     
-def edit_line(filename: str, line_number: int, new_content: str, operation:   
- str = 'replace'):                                                             
+def edit_line(filename: str, line_number: int, new_content: str, operation: str):
      with open(filename) as f: lines = f.readlines()                           
      max_line = len(lines)                                                     
                                                                                
      # Replace operation: works on 1-based index                               
      if operation == 'replace':                                                
          if line_number < 1 or line_number > max_line:                         
-             raise ValueError(f"Line {line_number} (1-based) in {filename} is invalid")                                                                     
+             raise ValueError(f"Line {line_number} (1-based) in {filename} is invalid")
          target_index = line_number - 1  # Convert to 0-based index            
          # Ensure proper newline handling                                      
          if new_content[-1:] != '\n': new_content += '\n'                      
@@ -28,9 +31,8 @@ def edit_line(filename: str, line_number: int, new_content: str, operation:
                                                                                
      # Insert_after operation: inserts after specified line                    
      elif operation == 'insert_after':                                         
-         if line_number < 1 or line_number + 1 > max_line + 1:                 
-             raise ValueError(f"Insert after {line_number} in {filename} is invalid")                                                                     
-                                                                               
+         if line_number < 1 or line_number > max_line:                 
+             raise ValueError(f"Insert after {line_number} in {filename} is invalid")
          # Auto-append if line_number matches last line                        
          insert_pos = line_number if line_number < max_line else max_line      
          # Insert at next position (0-based)                                   
@@ -66,7 +68,7 @@ tool_defs = [
                 "properties": {
                     "filename": {
                         "type": "string",
-                        "description": "Path to the file that you wish to read."
+                        "description": "Path to the file that you wish to read.",
                     },
                 },
                 "required": ["filename"],
@@ -77,7 +79,7 @@ tool_defs = [
         "type": "function",
         "function": {
             "name": "read_file_at_line",
-            "description": "Reads a file with the path name relative to current dir, but only at the specified line number. Always use this first to confirm the line number of a particular piece of code before replacing it.",
+            "description": "Reads a file with the path name relative to current dir, but only at the specified line number (1-based). Always use this first to confirm the line number of a particular piece of code before replacing it.",
             "parameters": { 
                 "type": "object",
                 "properties": {
@@ -87,10 +89,34 @@ tool_defs = [
                     },
                     "line_number": {
                         "type": "integer",
-                        "description": "Line number to read from the file, starting from 0 and only a positive number."
+                        "description": "Line number to read from the file, starting from 1 and only a positive number."
                     },
                 },
                 "required": ["filename", "line_number"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Writes to a file in mode 'w+'. Can be used to overwrite a file or write to a new file.",
+            "parameters": { 
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "description": "Path to the file that you wish to write to."
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of strings to write to the file."
+                    },
+                },
+                "required": ["filename", "lines"],
             },
         },
     },
@@ -108,9 +134,8 @@ tool_defs = [
                      "operation": {"type": "string", "enum": ["replace",           
      "insert_after"]}                                                              
                  },                                                                
-                 "required": ["filename", "line_number", "new_content",            
-     "operation"]                                                                  
-             },                                                                    
+                 "required": ["filename", "line_number", "new_content", "operation"]
+            },                                                                    
              "strict": False                                                       
          }                                                                         
      }
@@ -119,6 +144,7 @@ tool_defs = [
 tool_funcs = {
     "list_files": list_files,
     "read_file": read_file,
+    "write_file": write_file,
     "edit_line": edit_line,
     "read_file_at_line": read_file_at_line
 }
